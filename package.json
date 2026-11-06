@@ -1,0 +1,8 @@
+{
+  "name": "proview-analytics-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"web/static/js/*.test.js\""
+  }
+}

@@ -1,0 +1,94 @@
+# Default values for proview-analytics.
+
+image:
+  repository: ghcr.io/demoningvi/proview-analytics
+  tag: ""            # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Ignored when autoscaling.enabled=true.
+replicaCount: 2
+args: []
+
+ports:
+  http: 8080   # admin UI + /api/v1/* (protect with SSO/oauth2-proxy or basic auth)
+opsPort: 9090  # /healthz /readyz /metrics
+
+env:
+  LOG_LEVEL: info
+  CLICKHOUSE_ADDRS: clickhouse-proview:9000
+  CLICKHOUSE_USER: proview_ro
+  QUERY_TIMEOUT: 10s
+  CACHE_TTL: 15s
+  ADMIN_USER: admin
+  AUTH_DISABLED: "false"   # true only behind an authenticating proxy
+  BANNER_ADMIN_URL: http://proview-banner-service:8081
+  SHUTDOWN_DELAY: 3s
+  SHUTDOWN_TIMEOUT: 15s
+
+# Sensitive settings are read from a Secret.
+secret:
+  existingSecret: ""   # recommended in production
+  keys: [CLICKHOUSE_PASSWORD, ADMIN_PASSWORD, BANNER_ADMIN_TOKEN]
+  values: {}           # dev only: rendered into a Secret when existingSecret is empty
+
+# Extra env vars from other Secrets: [{name, secretName, key}]
+extraSecretEnv: []
+
+migrations:
+  enabled: false
+
+service:
+  type: ClusterIP
+
+resources:
+  requests: { cpu: 100m, memory: 64Mi }
+  limits: { cpu: "1", memory: 256Mi }
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+
+terminationGracePeriodSeconds: 30
+
+serviceAccount:
+  create: true
+  name: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  servicePort: http
+  annotations: {}
+  # e.g. nginx.ingress.kubernetes.io/auth-url: https://oauth2.example.com/oauth2/auth
+  hosts:
+    - host: analytics.proview.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+serviceMonitor:
+  enabled: false
+  interval: 15s
+
+networkPolicy:
+  enabled: false
+  from:
+    http: []    # empty = allow from anywhere (ingress controller)
+    ops: []
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+volumes: []
+volumeMounts: []

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProView Analytics</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="vendor/echarts.min.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+      <span>ProView <b>Analytics</b></span>
+    </div>
+    <div class="topbar-right">
+      <span id="status" class="status" role="status" aria-live="polite"></span>
+      <button id="theme" class="ghost" type="button" aria-label="Переключить тему">◐</button>
+    </div>
+  </header>
+
+  <form id="filters" class="filters" autocomplete="off">
+    <label>Период
+      <select name="period" id="f-period"></select>
+    </label>
+    <label class="custom-range">С <input type="datetime-local" name="from"></label>
+    <label class="custom-range">По <input type="datetime-local" name="to"></label>
+    <label>Шаг
+      <select name="granularity">
+        <option value="">авто</option>
+        <option value="minute">минута</option>
+        <option value="hour">час</option>
+        <option value="day">день</option>
+      </select>
+    </label>
+    <label>Метрика <select name="metric" id="f-metric"></select></label>
+    <label>Разрез
+      <select name="group_by">
+        <option value="none">без разреза</option>
+        <option value="banner">по баннерам</option>
+        <option value="placement">по местам</option>
+        <option value="country">по странам</option>
+        <option value="device">по устройствам</option>
+      </select>
+    </label>
+    <label>Баннер <select name="banner" data-dim="banner"><option value="">все</option></select></label>
+    <label>Место <select name="placement" data-dim="placement"><option value="">все</option></select></label>
+    <label>Страна <select name="country" data-dim="country"><option value="">все</option></select></label>
+    <label>Устройство <select name="device" data-dim="device"><option value="">все</option></select></label>
+    <label>Пояс
+      <select name="tz">
+        <option value="UTC">UTC</option>
+        <option value="Europe/Moscow">Москва</option>
+        <option value="Europe/Berlin">Берлин</option>
+        <option value="Asia/Yekaterinburg">Екатеринбург</option>
+        <option value="Asia/Novosibirsk">Новосибирск</option>
+        <option value="America/New_York">Нью-Йорк</option>
+      </select>
+    </label>
+    <label>Автообновление
+      <select name="refresh">
+        <option value="0">выкл.</option>
+        <option value="15">15 с</option>
+        <option value="60">1 мин</option>
+      </select>
+    </label>
+  </form>
+
+  <main>
+    <section class="kpis" id="kpis" aria-label="Ключевые показатели"></section>
+
+    <section class="card wide">
+      <div class="card-head">
+        <h2 id="ts-title">Динамика</h2>
+        <button class="ghost small" type="button" data-table-toggle="ts">Таблица</button>
+      </div>
+      <div id="chart-ts" class="chart tall" role="img" aria-label="График метрики по времени"></div>
+      <div class="table-view" id="table-ts" hidden></div>
+    </section>
+
+    <div class="grid2">
+      <section class="card">
+        <div class="card-head"><h2>Воронка вовлечения</h2></div>
+        <div id="chart-funnel" class="chart" role="img" aria-label="Воронка: показы, видимые, наведения, клики"></div>
+      </section>
+      <section class="card">
+        <div class="card-head">
+          <h2 id="heat-title">По дням недели и часам</h2>
+        </div>
+        <div id="chart-heat" class="chart" role="img" aria-label="Тепловая карта по дням недели и часам"></div>
+      </section>
+    </div>
+
+    <section class="card wide">
+      <div class="card-head">
+        <h2>Срез</h2>
+        <div class="tabs" role="tablist" id="dim-tabs">
+          <button type="button" role="tab" data-dim="banner">Баннеры</button>
+          <button type="button" role="tab" data-dim="placement">Места</button>
+          <button type="button" role="tab" data-dim="country">Страны</button>
+          <button type="button" role="tab" data-dim="device">Устройства</button>
+        </div>
+      </div>
+      <div class="split">
+        <div id="chart-breakdown" class="chart" role="img" aria-label="Метрика по выбранному разрезу"></div>
+        <div class="table-view" id="table-breakdown"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="foot">Данные: ClickHouse proview_agg · агрегаты обновляются в реальном времени, кэш ответа 15 с</footer>
+</body>
+</html>
